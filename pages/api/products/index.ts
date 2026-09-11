@@ -3,6 +3,7 @@ import {
     createProduct,
     getProducts,
 } from "@/lib/db/products";
+import { handleApiError } from "@/lib/api/handleApiError";
 
 export default async function handler(
     req: NextApiRequest,
@@ -37,11 +38,6 @@ export default async function handler(
                 });
         }
     } catch (error) {
-        console.error(error);
-
-        return res.status(500).json({
-            success: false,
-            message: "Internal server error",
-        });
+        return handleApiError(error, res);
     }
 }
