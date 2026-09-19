@@ -1,0 +1,256 @@
+USE [master]
+GO
+/****** Object:  Database [Management_Experience]    Script Date: 9/19/2026 9:45:48 AM ******/
+CREATE DATABASE [Management_Experience]
+ CONTAINMENT = NONE
+ ON  PRIMARY
+( NAME = N'Management_Experience', FILENAME = N'E:\Data\NewFeature\Management_Experience.mdf' , SIZE = 8192KB , MAXSIZE = UNLIMITED, FILEGROWTH = 10%)
+ LOG ON
+( NAME = N'Management_Experience_log', FILENAME = N'F:\Log\NewFeature\Management_Experience_log.ldf' , SIZE = 1024KB , MAXSIZE = 2048GB , FILEGROWTH = 10%)
+GO
+ALTER DATABASE [Management_Experience] SET COMPATIBILITY_LEVEL = 130
+GO
+IF (1 = FULLTEXTSERVICEPROPERTY('IsFullTextInstalled'))
+begin
+EXEC [Management_Experience].[dbo].[sp_fulltext_database] @action = 'enable'
+end
+GO
+ALTER DATABASE [Management_Experience] SET ANSI_NULL_DEFAULT OFF
+GO
+ALTER DATABASE [Management_Experience] SET ANSI_NULLS OFF
+GO
+ALTER DATABASE [Management_Experience] SET ANSI_PADDING OFF
+GO
+ALTER DATABASE [Management_Experience] SET ANSI_WARNINGS OFF
+GO
+ALTER DATABASE [Management_Experience] SET ARITHABORT OFF
+GO
+ALTER DATABASE [Management_Experience] SET AUTO_CLOSE OFF
+GO
+ALTER DATABASE [Management_Experience] SET AUTO_SHRINK OFF
+GO
+ALTER DATABASE [Management_Experience] SET AUTO_UPDATE_STATISTICS ON
+GO
+ALTER DATABASE [Management_Experience] SET CURSOR_CLOSE_ON_COMMIT OFF
+GO
+ALTER DATABASE [Management_Experience] SET CURSOR_DEFAULT  GLOBAL
+GO
+ALTER DATABASE [Management_Experience] SET CONCAT_NULL_YIELDS_NULL OFF
+GO
+ALTER DATABASE [Management_Experience] SET NUMERIC_ROUNDABORT OFF
+GO
+ALTER DATABASE [Management_Experience] SET QUOTED_IDENTIFIER OFF
+GO
+ALTER DATABASE [Management_Experience] SET RECURSIVE_TRIGGERS OFF
+GO
+ALTER DATABASE [Management_Experience] SET  DISABLE_BROKER
+GO
+ALTER DATABASE [Management_Experience] SET AUTO_UPDATE_STATISTICS_ASYNC OFF
+GO
+ALTER DATABASE [Management_Experience] SET DATE_CORRELATION_OPTIMIZATION OFF
+GO
+ALTER DATABASE [Management_Experience] SET TRUSTWORTHY OFF
+GO
+ALTER DATABASE [Management_Experience] SET ALLOW_SNAPSHOT_ISOLATION OFF
+GO
+ALTER DATABASE [Management_Experience] SET PARAMETERIZATION SIMPLE
+GO
+ALTER DATABASE [Management_Experience] SET READ_COMMITTED_SNAPSHOT OFF
+GO
+ALTER DATABASE [Management_Experience] SET HONOR_BROKER_PRIORITY OFF
+GO
+ALTER DATABASE [Management_Experience] SET RECOVERY SIMPLE
+GO
+ALTER DATABASE [Management_Experience] SET  MULTI_USER
+GO
+ALTER DATABASE [Management_Experience] SET PAGE_VERIFY CHECKSUM
+GO
+ALTER DATABASE [Management_Experience] SET DB_CHAINING OFF
+GO
+ALTER DATABASE [Management_Experience] SET FILESTREAM( NON_TRANSACTED_ACCESS = OFF )
+GO
+ALTER DATABASE [Management_Experience] SET TARGET_RECOVERY_TIME = 0 SECONDS
+GO
+ALTER DATABASE [Management_Experience] SET DELAYED_DURABILITY = DISABLED
+GO
+EXEC sys.sp_db_vardecimal_storage_format N'Management_Experience', N'ON'
+GO
+ALTER DATABASE [Management_Experience] SET QUERY_STORE = OFF
+GO
+USE [Management_Experience]
+GO
+ALTER DATABASE SCOPED CONFIGURATION SET LEGACY_CARDINALITY_ESTIMATION = OFF;
+GO
+ALTER DATABASE SCOPED CONFIGURATION SET MAXDOP = 0;
+GO
+ALTER DATABASE SCOPED CONFIGURATION SET PARAMETER_SNIFFING = ON;
+GO
+ALTER DATABASE SCOPED CONFIGURATION SET QUERY_OPTIMIZER_HOTFIXES = OFF;
+GO
+USE [Management_Experience]
+GO
+/****** Object:  User [a.altafi]    Script Date: 9/19/2026 9:45:48 AM ******/
+CREATE USER [a.altafi] FOR LOGIN [a.altafi] WITH DEFAULT_SCHEMA=[dbo]
+GO
+ALTER ROLE [db_owner] ADD MEMBER [a.altafi]
+GO
+/****** Object:  Table [dbo].[Products]    Script Date: 9/19/2026 9:45:48 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Products](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Name] [nvarchar](150) NOT NULL,
+	[Description] [nvarchar](500) NULL,
+	[Price] [decimal](18, 2) NOT NULL,
+	[Stock] [int] NOT NULL,
+	[CreatedAt] [datetime2](7) NOT NULL,
+	[UpdatedAt] [datetime2](7) NULL,
+PRIMARY KEY CLUSTERED
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  View [dbo].[vw_ProductList]    Script Date: 9/19/2026 9:45:48 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vw_ProductList]
+AS
+SELECT
+    Id,
+    Name,
+    Description,
+    Price,
+    Stock,
+    CreatedAt,
+    UpdatedAt
+FROM dbo.Products;
+GO
+ALTER TABLE [dbo].[Products] ADD  DEFAULT ((0)) FOR [Stock]
+GO
+ALTER TABLE [dbo].[Products] ADD  DEFAULT (getdate()) FOR [CreatedAt]
+GO
+/****** Object:  StoredProcedure [dbo].[Product_Create]    Script Date: 9/19/2026 9:45:48 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[Product_Create]
+    @Name NVARCHAR(150),
+    @Description NVARCHAR(500),
+    @Price DECIMAL(18,2),
+    @Stock INT
+AS
+BEGIN
+
+    SET NOCOUNT ON;
+
+    INSERT INTO dbo.Products
+    (
+        Name,
+        Description,
+        Price,
+        Stock
+    )
+    VALUES
+    (
+        @Name,
+        @Description,
+        @Price,
+        @Stock
+    );
+
+    SELECT
+        SCOPE_IDENTITY() AS Id;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Product_Delete]    Script Date: 9/19/2026 9:45:48 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[Product_Delete]
+    @Id INT
+AS
+BEGIN
+
+    SET NOCOUNT ON;
+
+    DELETE FROM dbo.Products
+    WHERE Id = @Id;
+
+    SELECT
+        @Id AS Id;
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Product_GetById]    Script Date: 9/19/2026 9:45:48 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[Product_GetById]
+    @Id INT
+AS
+BEGIN
+
+    SET NOCOUNT ON;
+
+    SELECT
+        Id,
+        Name,
+        Description,
+        Price,
+        Stock,
+        CreatedAt,
+        UpdatedAt
+    FROM dbo.Products
+    WHERE Id = @Id;
+
+END;
+GO
+/****** Object:  StoredProcedure [dbo].[Product_Update]    Script Date: 9/19/2026 9:45:48 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE PROCEDURE [dbo].[Product_Update]
+    @Id INT,
+    @Name NVARCHAR(150),
+    @Description NVARCHAR(500),
+    @Price DECIMAL(18,2),
+    @Stock INT
+AS
+BEGIN
+
+    SET NOCOUNT ON;
+
+    UPDATE dbo.Products
+    SET
+        Name = @Name,
+        Description = @Description,
+        Price = @Price,
+        Stock = @Stock,
+        UpdatedAt = GETDATE()
+    WHERE Id = @Id;
+
+    SELECT
+        Id,
+        Name,
+        Description,
+        Price,
+        Stock,
+        CreatedAt,
+        UpdatedAt
+    FROM dbo.Products
+    WHERE Id = @Id;
+
+END;
+GO
+USE [master]
+GO
+ALTER DATABASE [Management_Experience] SET  READ_WRITE
+GO
